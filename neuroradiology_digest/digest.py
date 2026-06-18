@@ -85,10 +85,15 @@ def _ncbi_params(**kwargs) -> dict:
 
 
 def fetch_journal_articles(pubmed_ta: str, days_back: int = 7) -> list[dict]:
-    """Return all articles from *pubmed_ta* published in the last *days_back* days."""
+    """Return all articles from *pubmed_ta* added to PubMed in the last *days_back* days.
+
+    Uses entry date (edat) rather than publication date (dp): an article's print/cover
+    date frequently lags its actual PubMed indexing date, so filtering on dp misses
+    articles that were genuinely new this week.
+    """
     end = datetime.now()
     start = end - timedelta(days=days_back)
-    date_range = f"{start.strftime('%Y/%m/%d')}:{end.strftime('%Y/%m/%d')}[dp]"
+    date_range = f"{start.strftime('%Y/%m/%d')}:{end.strftime('%Y/%m/%d')}[edat]"
 
     query = f'"{pubmed_ta}"[ta] AND {date_range}'
 
@@ -303,6 +308,14 @@ Rules:
 # ---------------------------------------------------------------------------
 
 def run():
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        print(
+            "ERROR: ANTHROPIC_API_KEY is not set. Add it as a repository secret "
+            "(Settings -> Secrets and variables -> Actions) before running this workflow.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     print(f"Weekly Neuroradiology Digest — {datetime.now().strftime('%Y-%m-%d')}")
     print("=" * 60)
 
