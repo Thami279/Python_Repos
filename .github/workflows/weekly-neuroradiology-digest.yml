@@ -5,11 +5,6 @@ on:
     # Every Monday at 06:00 UTC (08:00 SAST / 07:00 CAT)
     - cron: '0 6 * * 1'
   workflow_dispatch:
-    inputs:
-      days_back:
-        description: 'Days of articles to look back (default 7)'
-        required: false
-        default: '7'
 
 permissions:
   contents: write
